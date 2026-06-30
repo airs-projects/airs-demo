@@ -5,4 +5,7 @@ edition = "2024"
 license = "Apache-2.0"
 
 [dependencies]
-airs = { path = "../airs" }
+airs = { path = "../airs", features = ["gui"] }
+pollster = "0.4"
+raw-window-handle = "0.6"
+winit = "0.30"
