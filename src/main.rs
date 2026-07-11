@@ -37,8 +37,8 @@ impl DemoApp {
             .with_title(&window_config.title)
             .with_inner_size(LogicalSize::new(window_config.width, window_config.height));
 
-        let mut main_window = WgpuWindow::new(event_loop, attributes)?;
-        main_window.init_wgpu()?;
+        let window = event_loop.create_window(attributes)?;
+        let main_window = WgpuWindow::new(window)?;
 
         self.main_window = Some(main_window);
         Ok(())
