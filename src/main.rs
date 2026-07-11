@@ -1,7 +1,7 @@
 use std::{error::Error, sync::Arc};
 
 use airs_config::Config;
-use airs_window::WgpuSurface;
+use airs_window::WindowContext;
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
@@ -18,7 +18,7 @@ mod config;
 struct DemoApp {
     config: Config<ConfigData>,
     main_window: Option<Arc<Window>>,
-    wgpu_surface: Option<WgpuSurface>,
+    main_window_context: Option<WindowContext<'static>>,
 }
 
 impl DemoApp {
@@ -28,33 +28,31 @@ impl DemoApp {
         Ok(Self {
             config,
             main_window: None,
-            wgpu_surface: None,
+            main_window_context: None,
         })
     }
 
+    #[tracing::instrument(skip_all)]
     fn create_main_window(&mut self, event_loop: &ActiveEventLoop) -> airs_window::Result<()> {
         let window_config = &self.config.window;
         let attributes = WindowAttributes::default()
             .with_title(&window_config.title)
             .with_inner_size(LogicalSize::new(window_config.width, window_config.height));
 
-        tracing::info!("winit main window create begin");
         let main_window = Arc::new(event_loop.create_window(attributes)?);
-        tracing::info!("winit main window create end");
 
         self.main_window = Some(main_window);
         Ok(())
     }
 
-    fn create_wgpu_surface(&mut self) -> airs_window::Result<()> {
-        let main_window = self
-            .main_window
-            .as_ref()
-            .expect("main window must be created before its surface");
-        let wgpu_surface = WgpuSurface::new(main_window.clone())?;
+    #[tracing::instrument(skip_all)]
+    fn create_main_window_context(&mut self) -> airs_window::Result<()> {
+        let main_window = self.main_window.as_ref().unwrap();
+        let size = main_window.inner_size();
+        let main_window_context = WindowContext::new(main_window.clone(), size.width, size.height)?;
 
         main_window.request_redraw();
-        self.wgpu_surface = Some(wgpu_surface);
+        self.main_window_context = Some(main_window_context);
         Ok(())
     }
 }
@@ -75,10 +73,10 @@ impl ApplicationHandler for DemoApp {
             return;
         }
 
-        if self.wgpu_surface.is_none()
-            && let Err(error) = self.create_wgpu_surface()
+        if self.main_window_context.is_none()
+            && let Err(error) = self.create_main_window_context()
         {
-            tracing::error!(%error, "surface create failed");
+            tracing::error!(%error, "main window context create failed");
             event_loop.exit();
         }
     }
@@ -104,10 +102,18 @@ impl ApplicationHandler for DemoApp {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::Resized(size) => {
                 tracing::info!(width = size.width, height = size.height, "window resize");
+                if let Some(context) = &mut self.main_window_context {
+                    context.resize(size.width, size.height);
+                }
                 main_window.request_redraw();
             }
             WindowEvent::RedrawRequested => {
-                tracing::trace!("window redraw");
+                if let Some(context) = &self.main_window_context
+                    && let Err(error) = context.render()
+                {
+                    tracing::error!(%error, "window render failed");
+                    event_loop.exit();
+                }
             }
             _ => {}
         }
@@ -132,7 +138,7 @@ impl ApplicationHandler for DemoApp {
 
     fn exiting(&mut self, _event_loop: &ActiveEventLoop) {
         tracing::info!("application exiting");
-        self.wgpu_surface = None;
+        self.main_window_context = None;
         self.main_window = None;
     }
 
@@ -146,6 +152,10 @@ fn init_tracing() {
         .with_timer(tracing_subscriber::fmt::time::uptime())
         .with_max_level(tracing::Level::INFO)
         .with_target(true)
+        .with_span_events(
+            tracing_subscriber::fmt::format::FmtSpan::ENTER
+                | tracing_subscriber::fmt::format::FmtSpan::CLOSE,
+        )
         .compact()
         .init();
 }
