@@ -1,13 +1,13 @@
-use std::{error::Error, sync::Arc};
+use std::error::Error;
 
 use airs_config::Config;
-use airs_window::WindowContext;
+use airs_window::WgpuWindow;
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
     event::{DeviceEvent, DeviceId, StartCause, WindowEvent},
     event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
-    window::{Window, WindowAttributes, WindowId},
+    window::{WindowAttributes, WindowId},
 };
 
 use crate::config::ConfigData;
@@ -17,8 +17,7 @@ mod config;
 
 struct DemoApp {
     config: Config<ConfigData>,
-    main_window: Option<Arc<Window>>,
-    main_window_context: Option<WindowContext<'static>>,
+    main_window: Option<WgpuWindow>,
 }
 
 impl DemoApp {
@@ -28,7 +27,6 @@ impl DemoApp {
         Ok(Self {
             config,
             main_window: None,
-            main_window_context: None,
         })
     }
 
@@ -39,20 +37,10 @@ impl DemoApp {
             .with_title(&window_config.title)
             .with_inner_size(LogicalSize::new(window_config.width, window_config.height));
 
-        let main_window = Arc::new(event_loop.create_window(attributes)?);
+        let mut main_window = WgpuWindow::new(event_loop, attributes)?;
+        main_window.init_wgpu()?;
 
         self.main_window = Some(main_window);
-        Ok(())
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn create_main_window_context(&mut self) -> airs_window::Result<()> {
-        let main_window = self.main_window.as_ref().unwrap();
-        let size = main_window.inner_size();
-        let main_window_context = WindowContext::new(main_window.clone(), size.width, size.height)?;
-
-        main_window.request_redraw();
-        self.main_window_context = Some(main_window_context);
         Ok(())
     }
 }
@@ -72,13 +60,6 @@ impl ApplicationHandler for DemoApp {
             event_loop.exit();
             return;
         }
-
-        if self.main_window_context.is_none()
-            && let Err(error) = self.create_main_window_context()
-        {
-            tracing::error!(%error, "main window context create failed");
-            event_loop.exit();
-        }
     }
 
     fn user_event(&mut self, _event_loop: &ActiveEventLoop, _event: ()) {
@@ -91,7 +72,7 @@ impl ApplicationHandler for DemoApp {
         window_id: WindowId,
         event: WindowEvent,
     ) {
-        let Some(main_window) = &self.main_window else {
+        let Some(main_window) = &mut self.main_window else {
             return;
         };
         if main_window.id() != window_id {
@@ -102,15 +83,11 @@ impl ApplicationHandler for DemoApp {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::Resized(size) => {
                 tracing::info!(width = size.width, height = size.height, "window resize");
-                if let Some(context) = &mut self.main_window_context {
-                    context.resize(size.width, size.height);
-                }
+                main_window.resize(size.width, size.height);
                 main_window.request_redraw();
             }
             WindowEvent::RedrawRequested => {
-                if let Some(context) = &self.main_window_context
-                    && let Err(error) = context.render()
-                {
+                if let Err(error) = main_window.render() {
                     tracing::error!(%error, "window render failed");
                     event_loop.exit();
                 }
@@ -138,7 +115,6 @@ impl ApplicationHandler for DemoApp {
 
     fn exiting(&mut self, _event_loop: &ActiveEventLoop) {
         tracing::info!("application exiting");
-        self.main_window_context = None;
         self.main_window = None;
     }
 
