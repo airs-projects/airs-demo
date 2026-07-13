@@ -7,7 +7,9 @@ license = "Apache-2.0"
 [dependencies]
 airs = { path = "../airs" }
 airs-config = { path = "../airs-config" }
+airs-gui = { path = "../airs-gui" }
 airs-window = { path = "../airs-window" }
+anyhow = "1"
 rust-embed = { version = "8.12", features = ["debug-embed"] }
 serde = { version = "1", features = ["derive"] }
 tracing = "0.1"

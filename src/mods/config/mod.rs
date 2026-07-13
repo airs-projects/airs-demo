@@ -1,9 +1,13 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    ops::{Deref, DerefMut},
+    path::PathBuf,
+};
 
 use airs_config::{ConfigError, ConfigHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::assets::Assets;
+use crate::mods::assets::Assets;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ConfigData {
@@ -15,6 +19,33 @@ pub struct WindowConfig {
     pub title: String,
     pub width: u32,
     pub height: u32,
+}
+
+pub struct Config {
+    inner: airs_config::Config<ConfigData>,
+}
+
+impl Config {
+    #[tracing::instrument(skip_all)]
+    pub fn new() -> anyhow::Result<Self> {
+        Ok(Self {
+            inner: airs_config::Config::new()?,
+        })
+    }
+}
+
+impl Deref for Config {
+    type Target = ConfigData;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl DerefMut for Config {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
 }
 
 impl ConfigHandler for ConfigData {
