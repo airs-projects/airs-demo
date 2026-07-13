@@ -1,4 +1,6 @@
-use airs_window::WindowLoop;
+use std::sync::Arc;
+
+use airs_window::{ActiveWindowLoop, WindowLoop};
 use winit::{dpi::LogicalSize, window::WindowAttributes};
 
 use crate::view::main_window::MainWindow;
@@ -13,44 +15,50 @@ pub(crate) struct AppContext {
 }
 
 struct App {
-    context: AppContext,
-    window_loop: WindowLoop,
+    _context: Arc<AppContext>,
 }
 
 impl App {
-    fn new() -> anyhow::Result<Self> {
+    fn create_context() -> anyhow::Result<Arc<AppContext>> {
         let log = mods::log::Log::new();
         tracing::info!(version = airs::version(), "airs-demo start");
 
         let assets = mods::assets::Assets::new();
         let config = mods::config::Config::new()?;
 
-        Ok(Self {
-            context: AppContext {
-                _assets: assets,
-                _log: log,
-                config,
-            },
-            window_loop: WindowLoop::new(),
-        })
+        Ok(Arc::new(AppContext {
+            _assets: assets,
+            _log: log,
+            config,
+        }))
     }
 
-    fn run(mut self) -> airs_window::Result<()> {
+    fn create_window(
+        window_loop: &ActiveWindowLoop<'_>,
+        app_context: Arc<AppContext>,
+    ) -> anyhow::Result<()> {
         let attributes = WindowAttributes::default()
-            .with_title(&self.context.config.window.title)
+            .with_title(&app_context.config.window.title)
             .with_inner_size(LogicalSize::new(
-                self.context.config.window.width,
-                self.context.config.window.height,
+                app_context.config.window.width,
+                app_context.config.window.height,
             ));
-        let context = self.context;
 
-        self.window_loop.run(move |window_loop| {
-            window_loop.create_wgpu_window(attributes, MainWindow::new(context))
-        })
+        window_loop.create_wgpu_window(attributes, move |wgpu_window| {
+            MainWindow::new(wgpu_window, app_context)
+        })?;
+        Ok(())
+    }
+
+    fn new(window_loop: &ActiveWindowLoop<'_>) -> anyhow::Result<Self> {
+        let context = Self::create_context()?;
+        Self::create_window(window_loop, context.clone())?;
+
+        Ok(Self { _context: context })
     }
 }
 
 fn main() -> anyhow::Result<()> {
-    App::new()?.run()?;
+    WindowLoop::new().run(|window_loop| App::new(window_loop))?;
     Ok(())
 }

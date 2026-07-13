@@ -1,48 +1,60 @@
-use airs_gui::{Gui, GuiGpuResources};
-use airs_window::{Result, WgpuContext, WgpuWindowHandler};
+use std::sync::Arc;
+
+use airs_gui::{Gui, GuiCreateInfo, GuiFrame};
+use airs_window::{WgpuContext, WgpuWindow, WgpuWindowHandler, WindowEvent};
 
 use crate::AppContext;
+use crate::view::main_ui_scene::MainUiScene;
 
 pub struct MainWindow {
-    _app_ctx: AppContext,
-    gui: Option<Gui>,
+    _app_context: Arc<AppContext>,
+    gui: Gui,
 }
 
 impl MainWindow {
-    pub fn new(app_ctx: AppContext) -> Self {
-        Self {
-            _app_ctx: app_ctx,
-            gui: None,
-        }
-    }
+    pub fn new(wgpu_window: &WgpuWindow, app_context: Arc<AppContext>) -> anyhow::Result<Self> {
+        let gui = Gui::new(
+            GuiCreateInfo {
+                raw_window_handle: wgpu_window.raw_window_handle()?,
+                raw_display_handle: wgpu_window.raw_display_handle()?,
+                inner_size: wgpu_window.inner_size(),
+                scale_factor: wgpu_window.scale_factor() as f32,
+                wgpu_instance: wgpu_window.instance().clone(),
+                wgpu_adapter: wgpu_window.adapter().clone(),
+                wgpu_device: wgpu_window.device().clone(),
+                wgpu_queue: wgpu_window.queue().clone(),
+            },
+            |_window, _cx| MainUiScene::new(),
+        )?;
 
-    fn init_gui(&mut self, wgpu_ctx: &WgpuContext<'_>) {
-        let resources = GuiGpuResources::new(
-            wgpu_ctx.instance().clone(),
-            wgpu_ctx.adapter().clone(),
-            wgpu_ctx.device().clone(),
-            wgpu_ctx.queue().clone(),
-        );
-
-        self.gui = Some(Gui::new(resources));
+        Ok(Self {
+            _app_context: app_context,
+            gui,
+        })
     }
 }
 
 impl WgpuWindowHandler for MainWindow {
-    fn init(&mut self, wgpu_ctx: &WgpuContext<'_>) -> Result<()> {
-        self.init_gui(wgpu_ctx);
-        Ok(())
-    }
-
     fn resize(&mut self, _wgpu_ctx: &WgpuContext<'_>, _width: u32, _height: u32) {}
+
+    fn event(&mut self, event: &WindowEvent) {
+        self.gui.window_event(event);
+    }
 
     fn render(
         &mut self,
-        _wgpu_ctx: &WgpuContext<'_>,
-        _texture_view: &airs_window::wgpu::TextureView,
-        _command_encoder: &mut airs_window::wgpu::CommandEncoder,
-    ) -> Result<()> {
-        let _ = self.gui.as_ref().expect("gui must be initialized").gpu();
-        Ok(())
+        wgpu_ctx: &WgpuContext<'_>,
+        texture_view: &airs_window::wgpu::TextureView,
+        command_encoder: &mut airs_window::wgpu::CommandEncoder,
+        scale_factor: f32,
+    ) -> anyhow::Result<()> {
+        self.gui.render(GuiFrame {
+            texture_view,
+            command_encoder,
+            format: wgpu_ctx.surface_config().format,
+            width: wgpu_ctx.surface_config().width,
+            height: wgpu_ctx.surface_config().height,
+            scale_factor,
+        })
     }
 }
