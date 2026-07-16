@@ -1,4 +1,4 @@
-use airs_gui::{Context, IntoElement, Render, Window as GpuiWindow};
+use airs_gui::{Context, IntoElement, Render};
 
 pub struct MainUiScene;
 
@@ -9,7 +9,7 @@ impl MainUiScene {
 }
 
 impl Render for MainUiScene {
-    fn render(&mut self, _window: &mut GpuiWindow, _cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
         "Hello World"
     }
 }
