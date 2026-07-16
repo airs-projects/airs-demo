@@ -1636,7 +1636,6 @@ dependencies = [
  "waker-fn",
  "web-time",
  "windows",
- "winit",
 ]
 
 [[package]]
@@ -1685,7 +1684,6 @@ dependencies = [
  "swash",
  "unicode-segmentation",
  "wgpu",
- "winit",
 ]
 
 [[package]]
