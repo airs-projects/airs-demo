@@ -21,6 +21,7 @@ impl MainWindow {
                 width: inner_size.width,
                 height: inner_size.height,
                 scale_factor: wgpu_window.scale_factor() as f32,
+                texture_format: wgpu_window.surface_config().format,
                 wgpu_instance: wgpu_window.instance().clone(),
                 wgpu_adapter: wgpu_window.adapter().clone(),
                 wgpu_device: wgpu_window.device().clone(),
@@ -37,7 +38,9 @@ impl MainWindow {
 }
 
 impl WgpuWindowHandler for MainWindow {
-    fn resize(&mut self, _wgpu_ctx: &WgpuContext<'_>, _width: u32, _height: u32) {}
+    fn resize(&mut self, _wgpu_ctx: &WgpuContext<'_>, width: u32, height: u32) {
+        self.gui.resize(width, height);
+    }
 
     fn event(&mut self, event: &WindowEvent) {
         self.gui.window_event(event);
@@ -45,18 +48,14 @@ impl WgpuWindowHandler for MainWindow {
 
     fn render(
         &mut self,
-        wgpu_ctx: &WgpuContext<'_>,
+        _wgpu_ctx: &WgpuContext<'_>,
         texture_view: &airs_window::wgpu::TextureView,
         command_encoder: &mut airs_window::wgpu::CommandEncoder,
-        scale_factor: f32,
+        _scale_factor: f32,
     ) -> anyhow::Result<()> {
         self.gui.render(GuiFrame {
             texture_view,
             command_encoder,
-            format: wgpu_ctx.surface_config().format,
-            width: wgpu_ctx.surface_config().width,
-            height: wgpu_ctx.surface_config().height,
-            scale_factor,
         })
     }
 }
