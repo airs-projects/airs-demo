@@ -13,9 +13,13 @@ pub struct MainWindow {
 
 impl MainWindow {
     pub fn new(wgpu_window: &WgpuWindow, app_context: Arc<AppContext>) -> anyhow::Result<Self> {
+        let inner_size = wgpu_window.inner_size();
         let gui = Gui::new(
             GuiCreateInfo {
-                inner_size: wgpu_window.inner_size(),
+                x: 0,
+                y: 0,
+                width: inner_size.width,
+                height: inner_size.height,
                 scale_factor: wgpu_window.scale_factor() as f32,
                 wgpu_instance: wgpu_window.instance().clone(),
                 wgpu_adapter: wgpu_window.adapter().clone(),
@@ -36,7 +40,7 @@ impl WgpuWindowHandler for MainWindow {
     fn resize(&mut self, _wgpu_ctx: &WgpuContext<'_>, _width: u32, _height: u32) {}
 
     fn event(&mut self, event: &WindowEvent) {
-        self.gui.world_event(event);
+        self.gui.window_event(event);
     }
 
     fn render(
