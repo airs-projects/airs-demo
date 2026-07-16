@@ -90,14 +90,9 @@ name = "airs-gui"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "futures",
  "gpui",
  "gpui_wgpu",
- "parking_lot",
- "raw-window-handle",
- "smallvec",
  "tracing",
- "windows",
  "winit",
 ]
 
@@ -1618,7 +1613,6 @@ dependencies = [
  "postage",
  "profiling",
  "rand",
- "raw-window-handle",
  "refineable",
  "regex",
  "resvg",
@@ -1642,6 +1636,7 @@ dependencies = [
  "waker-fn",
  "web-time",
  "windows",
+ "winit",
 ]
 
 [[package]]
@@ -1680,22 +1675,17 @@ dependencies = [
  "collections",
  "cosmic-text",
  "etagere",
+ "futures",
  "gpui",
- "gpui_util",
  "itertools 0.14.0",
- "js-sys",
  "log",
  "parking_lot",
- "pollster 0.4.0",
  "profiling",
- "raw-window-handle",
  "smallvec",
  "swash",
  "unicode-segmentation",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
  "wgpu",
+ "winit",
 ]
 
 [[package]]

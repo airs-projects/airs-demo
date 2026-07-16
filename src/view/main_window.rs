@@ -15,8 +15,7 @@ impl MainWindow {
     pub fn new(wgpu_window: &WgpuWindow, app_context: Arc<AppContext>) -> anyhow::Result<Self> {
         let gui = Gui::new(
             GuiCreateInfo {
-                raw_window_handle: wgpu_window.raw_window_handle()?,
-                raw_display_handle: wgpu_window.raw_display_handle()?,
+                window_id: wgpu_window.id(),
                 inner_size: wgpu_window.inner_size(),
                 scale_factor: wgpu_window.scale_factor() as f32,
                 wgpu_instance: wgpu_window.instance().clone(),
@@ -24,7 +23,7 @@ impl MainWindow {
                 wgpu_device: wgpu_window.device().clone(),
                 wgpu_queue: wgpu_window.queue().clone(),
             },
-            |_window, _cx| MainUiScene::new(),
+            |_cx| MainUiScene::new(),
         )?;
 
         Ok(Self {
