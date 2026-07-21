@@ -14,21 +14,19 @@ pub struct MainWindow {
 impl MainWindow {
     pub fn new(wgpu_window: &WgpuWindow, app_context: Arc<AppContext>) -> anyhow::Result<Self> {
         let inner_size = wgpu_window.inner_size();
-        let gui = Gui::new(
-            GuiCreateInfo {
-                x: 0,
-                y: 0,
-                width: inner_size.width,
-                height: inner_size.height,
-                scale_factor: wgpu_window.scale_factor() as f32,
-                texture_format: wgpu_window.surface_config().format,
-                wgpu_instance: wgpu_window.instance().clone(),
-                wgpu_adapter: wgpu_window.adapter().clone(),
-                wgpu_device: wgpu_window.device().clone(),
-                wgpu_queue: wgpu_window.queue().clone(),
-            },
-            |_cx| MainUiScene::new(),
-        )?;
+        let mut gui = Gui::new(GuiCreateInfo {
+            x: 0,
+            y: 0,
+            width: inner_size.width,
+            height: inner_size.height,
+            scale_factor: wgpu_window.scale_factor() as f32,
+            texture_format: wgpu_window.surface_config().format,
+            wgpu_instance: wgpu_window.instance().clone(),
+            wgpu_adapter: wgpu_window.adapter().clone(),
+            wgpu_device: wgpu_window.device().clone(),
+            wgpu_queue: wgpu_window.queue().clone(),
+        })?;
+        gui.world_mut().set_root_entity(|_| MainUiScene::new());
 
         Ok(Self {
             _app_context: app_context,
@@ -42,6 +40,14 @@ impl WgpuWindowHandler for MainWindow {
         self.gui.resize(width, height);
     }
 
+    fn rescale(&mut self, _wgpu_ctx: &WgpuContext<'_>, scale_factor: f32) {
+        self.gui.rescale(scale_factor);
+    }
+
+    fn close(&mut self, _wgpu_ctx: &WgpuContext<'_>) {
+        self.gui.close();
+    }
+
     fn event(&mut self, event: &WindowEvent) {
         self.gui.window_event(event);
     }
@@ -51,7 +57,6 @@ impl WgpuWindowHandler for MainWindow {
         _wgpu_ctx: &WgpuContext<'_>,
         texture_view: &airs_window::wgpu::TextureView,
         command_encoder: &mut airs_window::wgpu::CommandEncoder,
-        _scale_factor: f32,
     ) -> anyhow::Result<()> {
         self.gui.render(GuiFrame {
             texture_view,
