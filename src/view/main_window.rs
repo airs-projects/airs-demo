@@ -21,7 +21,6 @@ impl MainWindow {
             height: inner_size.height,
             scale_factor: wgpu_window.scale_factor() as f32,
             texture_format: wgpu_window.surface_config().format,
-            wgpu_instance: wgpu_window.instance().clone(),
             wgpu_adapter: wgpu_window.adapter().clone(),
             wgpu_device: wgpu_window.device().clone(),
             wgpu_queue: wgpu_window.queue().clone(),
