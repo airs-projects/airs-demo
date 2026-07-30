@@ -16,3 +16,9 @@ impl Log {
         Self
     }
 }
+
+impl Default for Log {
+    fn default() -> Self {
+        Self::new()
+    }
+}

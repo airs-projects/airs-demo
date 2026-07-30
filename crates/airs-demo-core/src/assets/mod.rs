@@ -1,12 +1,18 @@
 use rust_embed::Embed;
 
 #[derive(Embed)]
-#[folder = "assets/"]
+#[folder = "../../assets/"]
 pub struct Assets;
 
 impl Assets {
     #[tracing::instrument(skip_all)]
     pub fn new() -> Self {
         Self
+    }
+}
+
+impl Default for Assets {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -1,18 +1,28 @@
-[package]
-name = "airs-demo"
+[workspace]
+resolver = "2"
+members = [
+    "crates/airs-demo",
+    "crates/airs-demo-core",
+    "crates/airs-demo-gui",
+]
+default-members = ["crates/airs-demo"]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
 license = "Apache-2.0"
 
-[dependencies]
+[workspace.dependencies]
 airs = { path = "../airs" }
 airs-config = { path = "../airs-config" }
 airs-gui = { path = "../airs-gui" }
 airs-window = { path = "../airs-window" }
+airs-demo-core = { path = "crates/airs-demo-core" }
+airs-demo-gui = { path = "crates/airs-demo-gui" }
 anyhow = "1"
 rust-embed = { version = "8.12", features = ["debug-embed"] }
 serde = { version = "1", features = ["derive"] }
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
-tokio = { version = "1.53.1", features = ["rt-multi-thread"] }
 winit = "0.30"

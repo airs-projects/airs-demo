@@ -1,20 +1,20 @@
 use std::sync::Arc;
 
+use airs_demo_core::AirsDemoCore;
 use airs_gui::{Gui, GuiCreateInfo, GuiFrame};
 use airs_window::{WgpuContext, WgpuWindow, WgpuWindowHandler, WindowEvent};
 
-use crate::AppContext;
-use crate::view::main_ui_scene::MainUiScene;
+use crate::main_ui_scene::MainUiScene;
 
 pub struct MainWindow {
-    _app_context: Arc<AppContext>,
+    _core: Arc<AirsDemoCore>,
     gui: Gui,
 }
 
 impl MainWindow {
     pub fn new(
         wgpu_window: &WgpuWindow,
-        app_context: Arc<AppContext>,
+        core: Arc<AirsDemoCore>,
         tokio_handle: tokio::runtime::Handle,
         wake: Arc<dyn Fn() + Send + Sync>,
     ) -> anyhow::Result<Self> {
@@ -34,10 +34,7 @@ impl MainWindow {
         })?;
         gui.world_mut().set_root_entity(|_| MainUiScene::new());
 
-        Ok(Self {
-            _app_context: app_context,
-            gui,
-        })
+        Ok(Self { _core: core, gui })
     }
 }
 

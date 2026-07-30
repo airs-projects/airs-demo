@@ -1,0 +1,12 @@
+[package]
+name = "airs-demo-gui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+airs-demo-core.workspace = true
+airs-gui.workspace = true
+airs-window.workspace = true
+anyhow.workspace = true
+tokio.workspace = true

@@ -7,7 +7,7 @@ use std::{
 use airs_config::{ConfigError, ConfigHandler};
 use serde::{Deserialize, Serialize};
 
-use crate::mods::assets::Assets;
+use crate::assets::Assets;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ConfigData {

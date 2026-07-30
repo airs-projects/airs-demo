@@ -1,0 +1,13 @@
+[package]
+name = "airs-demo-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+airs-config.workspace = true
+anyhow.workspace = true
+rust-embed.workspace = true
+serde.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
