@@ -12,7 +12,12 @@ pub struct MainWindow {
 }
 
 impl MainWindow {
-    pub fn new(wgpu_window: &WgpuWindow, app_context: Arc<AppContext>) -> anyhow::Result<Self> {
+    pub fn new(
+        wgpu_window: &WgpuWindow,
+        app_context: Arc<AppContext>,
+        tokio_handle: tokio::runtime::Handle,
+        wake: Arc<dyn Fn() + Send + Sync>,
+    ) -> anyhow::Result<Self> {
         let inner_size = wgpu_window.inner_size();
         let mut gui = Gui::new(GuiCreateInfo {
             x: 0,
@@ -24,6 +29,8 @@ impl MainWindow {
             wgpu_adapter: wgpu_window.adapter().clone(),
             wgpu_device: wgpu_window.device().clone(),
             wgpu_queue: wgpu_window.queue().clone(),
+            tokio_handle,
+            wake,
         })?;
         gui.world_mut().set_root_entity(|_| MainUiScene::new());
 
@@ -35,6 +42,11 @@ impl MainWindow {
 }
 
 impl WgpuWindowHandler for MainWindow {
+    fn update(&mut self) -> bool {
+        self.gui.update();
+        self.gui.needs_redraw()
+    }
+
     fn resize(&mut self, _wgpu_ctx: &WgpuContext<'_>, width: u32, height: u32) {
         self.gui.resize(width, height);
     }

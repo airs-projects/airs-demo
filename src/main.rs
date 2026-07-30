@@ -16,6 +16,7 @@ pub(crate) struct AppContext {
 
 struct App {
     _context: Arc<AppContext>,
+    _tokio_runtime: tokio::runtime::Runtime,
 }
 
 impl App {
@@ -36,6 +37,7 @@ impl App {
     fn create_window(
         window_loop: &ActiveWindowLoop<'_>,
         app_context: Arc<AppContext>,
+        tokio_handle: tokio::runtime::Handle,
     ) -> anyhow::Result<()> {
         let attributes = WindowAttributes::default()
             .with_title(&app_context.config.window.title)
@@ -44,17 +46,22 @@ impl App {
                 app_context.config.window.height,
             ));
 
+        let wake = window_loop.wake_callback();
         window_loop.create_wgpu_window(attributes, move |wgpu_window| {
-            MainWindow::new(wgpu_window, app_context)
+            MainWindow::new(wgpu_window, app_context, tokio_handle, wake)
         })?;
         Ok(())
     }
 
     fn new(window_loop: &ActiveWindowLoop<'_>) -> anyhow::Result<Self> {
         let context = Self::create_context()?;
-        Self::create_window(window_loop, context.clone())?;
+        let tokio_runtime = tokio::runtime::Runtime::new()?;
+        Self::create_window(window_loop, context.clone(), tokio_runtime.handle().clone())?;
 
-        Ok(Self { _context: context })
+        Ok(Self {
+            _context: context,
+            _tokio_runtime: tokio_runtime,
+        })
     }
 }
 
