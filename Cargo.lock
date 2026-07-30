@@ -94,7 +94,6 @@ dependencies = [
  "airs-gui",
  "airs-window",
  "anyhow",
- "tokio",
 ]
 
 [[package]]

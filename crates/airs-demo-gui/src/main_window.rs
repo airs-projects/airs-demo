@@ -15,7 +15,6 @@ impl MainWindow {
     pub fn new(
         wgpu_window: &WgpuWindow,
         core: Arc<AirsDemoCore>,
-        tokio_handle: tokio::runtime::Handle,
         wake: Arc<dyn Fn() + Send + Sync>,
     ) -> anyhow::Result<Self> {
         let inner_size = wgpu_window.inner_size();
@@ -29,7 +28,6 @@ impl MainWindow {
             wgpu_adapter: wgpu_window.adapter().clone(),
             wgpu_device: wgpu_window.device().clone(),
             wgpu_queue: wgpu_window.queue().clone(),
-            tokio_handle,
             wake,
         })?;
         gui.world_mut().set_root_entity(|_| MainUiScene::new());
