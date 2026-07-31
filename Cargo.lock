@@ -71,7 +71,6 @@ dependencies = [
  "anyhow",
  "tokio",
  "tracing",
- "winit",
 ]
 
 [[package]]
@@ -94,6 +93,7 @@ dependencies = [
  "airs-gui",
  "airs-window",
  "anyhow",
+ "winit",
 ]
 
 [[package]]

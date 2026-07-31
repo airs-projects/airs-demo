@@ -9,3 +9,4 @@ airs-demo-core.workspace = true
 airs-gui.workspace = true
 airs-window.workspace = true
 anyhow.workspace = true
+winit.workspace = true

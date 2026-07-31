@@ -19,6 +19,7 @@ pub struct WindowConfig {
     pub title: String,
     pub width: u32,
     pub height: u32,
+    pub max_frame_rate: u32,
 }
 
 pub struct Config {

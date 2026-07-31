@@ -2,3 +2,4 @@
 title = "airs-demo"
 width = 1280
 height = 720
+max_frame_rate = 60
