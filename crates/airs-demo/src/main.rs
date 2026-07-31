@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
+use airs::window::WindowLoop;
 use airs_demo_core::AirsDemoCore;
 use airs_demo_gui::MainWindow;
-use airs_window::WindowLoop;
 
 fn create_core() -> anyhow::Result<Arc<AirsDemoCore>> {
     let log = airs_demo_core::log::Log::new();

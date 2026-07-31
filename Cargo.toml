@@ -1,5 +1,5 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
     "crates/airs-demo",
     "crates/airs-demo-core",
@@ -13,10 +13,8 @@ edition = "2024"
 license = "Apache-2.0"
 
 [workspace.dependencies]
-airs = { path = "../airs" }
-airs-config = { path = "../airs-config" }
+airs = { path = "../airs/crates/airs", features = ["config", "window"] }
 airs-gui = { path = "../airs-gui" }
-airs-window = { path = "../airs-window" }
 airs-demo-core = { path = "crates/airs-demo-core" }
 airs-demo-gui = { path = "crates/airs-demo-gui" }
 anyhow = "1"

@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
+use airs::window::{WgpuContext, WgpuWindow, WgpuWindowHandler, WindowEvent};
 use airs_demo_core::AirsDemoCore;
 use airs_gui::{Gui, GuiCreateInfo, GuiFrame};
-use airs_window::{WgpuContext, WgpuWindow, WgpuWindowHandler, WindowEvent};
 use winit::{dpi::LogicalSize, window::WindowAttributes};
 
 use crate::main_ui_scene::MainUiScene;
@@ -82,8 +82,8 @@ impl WgpuWindowHandler for MainWindow {
     fn render(
         &mut self,
         _wgpu_ctx: &WgpuContext<'_>,
-        texture_view: &airs_window::wgpu::TextureView,
-        command_encoder: &mut airs_window::wgpu::CommandEncoder,
+        texture_view: &airs::window::wgpu::TextureView,
+        command_encoder: &mut airs::window::wgpu::CommandEncoder,
     ) -> anyhow::Result<()> {
         self.gui_mut().render(GuiFrame {
             texture_view,
