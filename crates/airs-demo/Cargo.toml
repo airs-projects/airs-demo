@@ -10,4 +10,3 @@ airs-demo-core.workspace = true
 airs-demo-gui.workspace = true
 anyhow.workspace = true
 tokio.workspace = true
-tracing.workspace = true
