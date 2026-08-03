@@ -3,7 +3,10 @@ use std::sync::Arc;
 use airs::window::{WgpuContext, WgpuWindow, WgpuWindowHandler, WindowEvent};
 use airs_demo_core::AirsDemoCore;
 use airs_gui::{Gui, GuiCreateInfo, GuiFrame};
-use winit::{dpi::LogicalSize, window::WindowAttributes};
+use winit::{
+    dpi::LogicalSize,
+    window::{CursorIcon, WindowAttributes},
+};
 
 use crate::views::RootView;
 
@@ -77,6 +80,13 @@ impl WgpuWindowHandler for MainWindow {
 
     fn event(&mut self, event: &WindowEvent) {
         self.gui_mut().window_event(event);
+    }
+
+    fn cursor_icon(&self) -> CursorIcon {
+        self.gui
+            .as_ref()
+            .map(Gui::cursor_icon)
+            .unwrap_or(CursorIcon::Default)
     }
 
     fn render(
