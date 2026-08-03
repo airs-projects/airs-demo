@@ -5,7 +5,7 @@ use airs_demo_core::AirsDemoCore;
 use airs_gui::{Gui, GuiCreateInfo, GuiFrame};
 use winit::{dpi::LogicalSize, window::WindowAttributes};
 
-use crate::main_ui_scene::MainUiScene;
+use crate::views::RootView;
 
 pub struct MainWindow {
     _core: Arc<AirsDemoCore>,
@@ -29,7 +29,7 @@ impl WgpuWindowHandler for MainWindow {
     fn window_attributes(&self) -> WindowAttributes {
         WindowAttributes::default()
             .with_title(&self._core.config.window.title)
-            .with_inner_size(LogicalSize::new(
+            .with_inner_size(LogicalSize::new(                   
                 self._core.config.window.width,
                 self._core.config.window.height,
             ))
@@ -52,7 +52,7 @@ impl WgpuWindowHandler for MainWindow {
             wgpu_device: wgpu_window.device().clone(),
             wgpu_queue: wgpu_window.queue().clone(),
         })?;
-        gui.world_mut().set_root_entity(|_| MainUiScene::new());
+        gui.world_mut().set_root_entity(|_| RootView::new());
         self.gui = Some(gui);
         Ok(())
     }

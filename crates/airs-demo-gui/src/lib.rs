@@ -1,4 +1,4 @@
-mod main_ui_scene;
 mod main_window;
+mod views;
 
 pub use main_window::MainWindow;
